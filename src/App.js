@@ -1,4 +1,102 @@
+import { useState } from "react";
+
+const data = [
+  { id: "clear", text: "AC" },
+  { id: "divide", text: "/" },
+  { id: "multiply", text: "x" },
+  { id: "seven", text: "7" },
+  { id: "eight", text: "8" },
+  { id: "nine", text: "9" },
+  { id: "subtract", text: "-" },
+  { id: "four", text: "4" },
+  { id: "five", text: "5" },
+  { id: "six", text: "6" },
+  { id: "add", text: "+" },
+  { id: "one", text: "1" },
+  { id: "two", text: "2" },
+  { id: "three", text: "3" },
+  { id: "equals", text: "=" },
+  { id: "zero", text: "0" },
+  { id: "decimal", text: "." },
+];
+
+function ClickableButton({ id, innerText, style, handleClick }) {
+  return (
+    <div
+      id={id}
+      className="calcButton"
+      style={style}
+      onClick={(e) => handleClick(e.target.innerText)}
+    >
+      {innerText}
+    </div>
+  );
+}
+
 function App() {
+  const [input, setInput] = useState("0");
+  const [calculation, setCalculation] = useState("");
+
+  function handleClick(e) {
+    console.log(e);
+    if (e === "AC") {
+      setInput("0");
+      setCalculation("");
+      return;
+    }
+    if (input === "0" && e === "0") return;
+    if (
+      (input === "0" && e !== ".") ||
+      input === "/" ||
+      input === "x" ||
+      input === "-" ||
+      input === "+" ||
+      e === "/" ||
+      e === "x" ||
+      e === "-" ||
+      e === "+"
+    ) {
+      setInput(e);
+      setCalculation((calculation) => calculation + e);
+      return;
+    }
+    setInput((input) => input + e);
+    setCalculation((calculation) => calculation + e);
+  }
+  const buttons = data.map((item) => {
+    let buttonStyle = {
+      cursor: "pointer",
+      border: ".5px solid white",
+      backgroundColor: "gray",
+      display: "grid",
+      justifyContent: "center",
+      alignItems: "center",
+    };
+    if (!parseInt(item.text) && item.text !== "." && item.text !== "0") {
+      buttonStyle.backgroundColor = "darkgray";
+    }
+    if (item.text === "AC") {
+      buttonStyle.backgroundColor = "red";
+      buttonStyle.gridColumn = "1/3";
+    }
+    if (item.text === "=") {
+      buttonStyle.backgroundColor = "blue";
+      buttonStyle.gridColumn = "4/-1";
+      buttonStyle.gridRow = "6/-1";
+    }
+    if (item.text === "0") {
+      buttonStyle.gridColumn = "1/3";
+    }
+    return (
+      <ClickableButton
+        key={item.id}
+        id={item.id}
+        innerText={item.text}
+        style={buttonStyle}
+        handleClick={handleClick}
+      />
+    );
+  });
   return (
     <div
       style={{
@@ -13,88 +111,39 @@ function App() {
           width: "350px",
           display: "grid",
           gridTemplateColumns: "1fr 1fr 1fr 1fr",
-          gridTemplateRows: "1fr 1fr 1fr 1fr 1fr 1fr",
+          gridTemplateRows: "auto auto 75px 75px 75px 75px 75px",
           position: "relative",
           backgroundColor: "black",
           color: "white",
           border: "2px solid black",
-          textAlign: "center",
         }}
       >
         <div
           id="display"
           style={{
             gridColumn: "1/-1",
-            textAlign: "end",
-            border: "1px solid white",
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "end",
+            color: "orange",
+            fontSize: "25px",
           }}
         >
-          Display
+          {calculation}
         </div>
         <div
-          id="clear"
+          id="display"
           style={{
-            gridColumn: "1/3",
-            border: "1px solid white",
+            gridColumn: "1/-1",
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "end",
+            fontSize: "40px",
           }}
         >
-          AC
+          {input === "" ? "0" : input}
         </div>
-        <div id="division" style={{ border: "1px solid white" }}>
-          /
-        </div>
-        <div id="multiplication" style={{ border: "1px solid white" }}>
-          X
-        </div>
-        <div id="7" style={{ border: "1px solid white" }}>
-          7
-        </div>
-        <div id="8" style={{ border: "1px solid white" }}>
-          8
-        </div>
-        <div id="9" style={{ border: "1px solid white" }}>
-          9
-        </div>
-        <div id="subtraction" style={{ border: "1px solid white" }}>
-          -
-        </div>
-        <div id="4" style={{ border: "1px solid white" }}>
-          4
-        </div>
-        <div id="5" style={{ border: "1px solid white" }}>
-          5
-        </div>
-        <div id="6" style={{ border: "1px solid white" }}>
-          6
-        </div>
-        <div id="addition" style={{ border: "1px solid white" }}>
-          +
-        </div>
-        <div id="1" style={{ border: "1px solid white" }}>
-          1
-        </div>
-        <div id="2" style={{ border: "1px solid white" }}>
-          2
-        </div>
-        <div id="3" style={{ border: "1px solid white" }}>
-          3
-        </div>
-        <div
-          id="equal"
-          style={{
-            border: "1px solid white",
-            gridColumn: "4/-1",
-            gridRow: "5/-1",
-          }}
-        >
-          =
-        </div>
-        <div id="0" style={{ gridColumn: "1/3", border: "1px solid white" }}>
-          0
-        </div>
-        <div id="decimal" style={{ border: "1px solid white" }}>
-          .
-        </div>
+        {buttons}
       </div>
     </div>
   );
