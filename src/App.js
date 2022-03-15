@@ -3,7 +3,7 @@ import { useState } from "react";
 const data = [
   { id: "clear", text: "AC" },
   { id: "divide", text: "/" },
-  { id: "multiply", text: "x" },
+  { id: "multiply", text: "*" },
   { id: "seven", text: "7" },
   { id: "eight", text: "8" },
   { id: "nine", text: "9" },
@@ -37,33 +37,78 @@ function App() {
   const [input, setInput] = useState("0");
   const [calculation, setCalculation] = useState("");
 
-  function handleClick(e) {
-    console.log(e);
-    if (e === "AC") {
-      setInput("0");
-      setCalculation("");
+  function handleReset() {
+    setInput("0");
+    setCalculation("");
+  }
+
+  function handleEquals() {
+    if (calculation.includes("=")) {
       return;
+    }
+    setCalculation((calculation) => calculation + "=" + eval(calculation));
+    setInput(eval(calculation));
+  }
+
+  function handleClick(e) {
+    if (calculation.includes("=")) {
+      if (/\D/.test(e) && e !== ".") {
+        setInput(e);
+        setCalculation(input + e);
+        return;
+      } else {
+        setInput(e);
+        setCalculation(e);
+        return;
+      }
     }
     if (input === "0" && e === "0") return;
-    if (
-      (input === "0" && e !== ".") ||
-      input === "/" ||
-      input === "x" ||
-      input === "-" ||
-      input === "+" ||
-      e === "/" ||
-      e === "x" ||
-      e === "-" ||
-      e === "+"
-    ) {
+    if (input === "0" && e !== ".") {
       setInput(e);
-      setCalculation((calculation) => calculation + e);
+      setCalculation(e);
       return;
     }
-    setInput((input) => input + e);
-    setCalculation((calculation) => calculation + e);
+    if (
+      /\D/.test(calculation[calculation.length - 2]) &&
+      calculation[calculation.length - 2] !== "." &&
+      input === "-" &&
+      /\D/.test(e) &&
+      e !== "."
+    ) {
+      setInput(e);
+      setCalculation(
+        (calculation) => calculation.substring(0, calculation.length - 2) + e
+      );
+      return;
+    } else if (
+      /\D/.test(e) &&
+      e !== "." &&
+      e !== "-" &&
+      /\D/.test(input) &&
+      !input.includes(".")
+    ) {
+      setInput(e);
+      setCalculation(
+        (calculation) => calculation.substring(0, calculation.length - 1) + e
+      );
+      return;
+    }
+    if (input.includes(".") && e === ".") {
+      return;
+    }
+    if (/\D/.test(e) && e !== ".") {
+      setInput(e);
+      setCalculation((calculation) => calculation + e);
+    } else if (/\D/.test(input) && !input.includes(".")) {
+      setInput(e);
+      setCalculation((calculation) => calculation + e);
+    } else {
+      setInput((input) => input + e);
+      setCalculation((calculation) => calculation + e);
+    }
   }
   const buttons = data.map((item) => {
+    let clickFunction = handleClick;
     let buttonStyle = {
       cursor: "pointer",
       border: ".5px solid white",
@@ -78,11 +123,13 @@ function App() {
     if (item.text === "AC") {
       buttonStyle.backgroundColor = "red";
       buttonStyle.gridColumn = "1/3";
+      clickFunction = handleReset;
     }
     if (item.text === "=") {
       buttonStyle.backgroundColor = "blue";
       buttonStyle.gridColumn = "4/-1";
       buttonStyle.gridRow = "6/-1";
+      clickFunction = handleEquals;
     }
     if (item.text === "0") {
       buttonStyle.gridColumn = "1/3";
@@ -93,7 +140,7 @@ function App() {
         id={item.id}
         innerText={item.text}
         style={buttonStyle}
-        handleClick={handleClick}
+        handleClick={clickFunction}
       />
     );
   });
@@ -119,14 +166,15 @@ function App() {
         }}
       >
         <div
-          id="display"
+          id="calc"
           style={{
             gridColumn: "1/-1",
             display: "flex",
             justifyContent: "end",
             alignItems: "end",
             color: "orange",
-            fontSize: "25px",
+            height: "20px",
+            fontSize: "20px",
           }}
         >
           {calculation}
@@ -141,7 +189,7 @@ function App() {
             fontSize: "40px",
           }}
         >
-          {input === "" ? "0" : input}
+          {input}
         </div>
         {buttons}
       </div>
